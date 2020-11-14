@@ -1,41 +1,41 @@
-# VRM-NX�t�@�C���A�g�V�X�e��
+# VRM-NXファイル連携システム
 
-## �T�v
-�uVRM-NX�t�@�C���A�g�V�X�e���v�iVRM-NX File linkege System�j�́u[�S���͌^�V�~�����[�^�[NX](http://www.imagic.co.jp/hobby/products/vrmnx/ "�S���͌^�V�~�����[�^�[NX")�v�iVRM-NX�j�̃r�����[�I�u�W�F�N�g���O�����琧�䂷�邽�߂�Python�ŋL�q���ꂽ�V�X�e���ł��B  
-�^�C�}�[�C�x���g(�����0.1�b��)�Ƀ��C�A�E�g�t�@�C���Ɠ��K�w�ɂ���uread�v�t�H���_���̃t�@�C����ǂݍ��݁A�e�L�X�g�ŋL�q����Ă��閽�߂�VRM-NX�̖��߂ɕϊ����Ď��s���܂��B
+## 概要
+「VRM-NXファイル連携システム」（VRM-NX File linkege System）は「[鉄道模型シミュレーターNX](http://www.imagic.co.jp/hobby/products/vrmnx/ "鉄道模型シミュレーターNX")」（VRM-NX）のビュワーオブジェクトを外部から制御するためのPythonで記述されたシステムです。  
+タイマーイベント(既定は0.1秒毎)にレイアウトファイルと同階層にある「read」フォルダ内のファイルを読み込み、テキストで記述されている命令をVRM-NXの命令に変換して実行します。
 
-## ���p���@
-���C�A�E�g�t�@�C���Ɠ����t�H���_�K�w�Ɂuvrmnxfls.py�v�t�@�C���Ɓuread�v�uread_end�v�t�H���_���������܂��B  
+## 利用方法
+レイアウトファイルと同じフォルダ階層に「vrmnxfls.py」ファイルと「read」「read_end」フォルダを準備します。  
 
 ```
-C:\VRM-NX�i���j
-�� \read
-�� \read_end
-�� \send (�C��)�usendSettingFile�v�֐��o�͗p
-�� vrmnxfls.py
-�� VRM-NX���C�A�E�g
+C:\VRM-NX（一例）
+├ \read
+├ \read_end
+├ \send (任意)「sendSettingFile」関数出力用
+├ vrmnxfls.py
+└ VRM-NXレイアウト
 ```
 
-�Ώۃ��C�A�E�g�̃��C�A�E�g�X�N���v�g�Ɉȉ��́����e��ǋL���܂��B  
-�C�ӊ֐��͕K�v�ɉ����ė��p���Ă��������B
+対象レイアウトのレイアウトスクリプトに以下の★内容を追記します。  
+任意関数は必要に応じて利用してください。
 
 ```py
 import vrmapi
-# ���t�@�C���A�g�V�X�e�����C���|�[�g
+# ★ファイル連携システムをインポート
 import vrmnxfls
 
 def vrmevent(obj,ev,param):
     if ev == 'init':
-        # ���N������0.1�b�Ԋu�̃^�C�}�[�C�x���g��o�^
+        # ★起動時に0.1秒間隔のタイマーイベントを登録
         obj.SetEventTimer(0.1)
-        # (�C��)send�t�H���_�Ƀ|�C���g�ƕҐ������o��
+        # (任意)sendフォルダにポイントと編成情報を出力
         vrmnxfls.sendSettingFile()
-        # (�C��)���C�A�E�g���̑S�Ґ��̓d�����ꊇ�ݒ�i0:OFF, 1:ON�j
+        # (任意)レイアウト内の全編成の電源を一括設定（0:OFF, 1:ON）
         vrmnxfls.setPowerAll(0)
     elif ev == 'broadcast':
         dummy = 1
     elif ev == 'timer':
-        # ���^�C�}�[�C�x���g�Ńt�H���_�������Ď�
+        # ★タイマーイベントでフォルダを周期監視
         vrmnxfls.readFile()
     elif ev == 'time':
         dummy = 1
@@ -47,93 +47,98 @@ def vrmevent(obj,ev,param):
         dummy = 1
 ```
 
-�t�@�C���ǂݍ��݂ɐ�������ƁA�r���[���[�N�����̃X�N���v�g���O�� `load vrmnxfls.py` �ƕ\������܂��B
+ファイル読み込みに成功すると、ビューワー起動時のスクリプトログに `load vrmnxfls.py` と表示されます。
 
-## readFile�֐�
-�e�L�X�g�t�@�C�����uread�v�t�H���_�ɂ����`readFile`�֐����t�@�C����ǂݍ��݁A���߂����s���܂��B  
-�ǂݍ��܂ꂽ�t�@�C���́uread_end�v�t�H���_�Ɉړ�����܂��B
+## readFile関数
+テキストファイルが「read」フォルダにあると`readFile`関数がファイルを読み込み、命令を実行します。  
+読み込まれたファイルは「read_end」フォルダに移動されます。
 
-### �t�@�C����
-�t�@�C�����͔N���������b�uyyyymmddhhmmssfff.txt�v�ł��B  
-�ǂݍ��ݑΏۂ́u��.txt�v�Ō��o���܂��B  
-�N���������b�̖����K����FIFO�i������o���j�����炷�邽�߂̃��[���ł��B
+### ファイル名
+ファイル名は年月日時分秒「yyyymmddhhmmssfff.txt」です。  
+読み込み対象は「＊.txt」で検出します。  
+年月日時分秒の命名規則はFIFO（先入れ先出し）を遵守するためのルールです。
 
-### ���߃t�@�C���\��
-�t�@�C���̓_�u���N�I�[�e�[�V���������A���s�����A�^�u��؂��1�sShift-JIS�e�L�X�g�t�@�C���ł��B
+### 命令ファイル構文
+ファイルはダブルクオーテーション無し、改行無し、タブ区切りの1行Shift-JISテキストファイルです。
 
-#### 1. Object���ʎq
+#### 1. Object識別子
 
-| ���ʎq | �I�u�W�F�N�g | ���O |
+| 識別子 | オブジェクト | 名前 |
 | ---- | ---- | ---- |
-| T | VRMTrain | �Ґ� |
-| P | VRMPoint | �|�C���g |
-| A | VRMATS | �����Z���T�[ |
-| B | VRMBell | ���� |
-| C | VRMCamera | �n��J���� |
-| R | VRMCar | ���q |
-| X | VRMCrossing | ���؁A�z�[���h�A |
-| E | VRMEmitter | �G�~�b�^�[ |
-| L | VRMLayout | ���C�A�E�g |
-| M | VRMMotionPath | ���[�V�����p�X |
-| G | VRMSignal | �M�� |
-| K | VRMSky | �X�J�C�h�[���A�V�� |
-| I | VRMSprite | �X�v���C�g |
-| S | VRMSystem | �V�X�e�� |
-| U | VRMTurntable | �^�[���^�[�u�� |
+| T | VRMTrain | 編成 |
+| P | VRMPoint | ポイント |
+| A | VRMATS | 自動センサー |
+| B | VRMBell | 音源 |
+| C | VRMCamera | 地上カメラ |
+| R | VRMCar | 車輌 |
+| X | VRMCrossing | 踏切、ホームドア |
+| E | VRMEmitter | エミッター |
+| L | VRMLayout | レイアウト |
+| M | VRMMotionPath | モーションパス |
+| G | VRMSignal | 信号 |
+| K | VRMSky | スカイドーム、天候 |
+| I | VRMSprite | スプライト |
+| S | VRMSystem | システム |
+| U | VRMTurntable | ターンターブル |
 
 #### 2. ObjectID(int)
-���ł͒��ڎQ�Ƃ̂ݑΉ����Ă��邽�߁A������ID������ꍇ�̓G���[�ƂȂ�܂��B  
-�f�[�^���ł̎w���A���݃`�F�b�N�𓱓�����\��ł��B
+α版は直接参照のみ対応しているため、無効なIDがある場合はエラーとなります。  
+データ名での指定や、存在チェックを導入する予定です。
 
-#### 3. ���ߊ֐�
-VRM-NX�Œ�`����Ă���e�I�u�W�F�N�g�̖��ߕ�����ł��B  
-�����񂪖����Ȃ��͖̂��߂���������܂��B
+#### 3. 命令関数
+VRM-NXで定義されている各オブジェクトの命令文字列です。  
+文字列が無効なものは命令が無視されます。
 
-#### 4. ����
-���ߊ֐��ɕK�v�Ȉ������L�ڂ��܂��B  
-������1�ȏ�Ȃ��ꍇ�͖��߂���������܂��B  
-���ł͕K��1�ȏ���������Ă��܂����A����͖��߃Z�b�g�ɉ����ėv�f�����`�F�b�N����\��ł��B
+#### 4. 引数
+命令関数に必要な引数を記載します。  
+引数が1つ以上ない場合は命令が無視されます。  
+α版は必ず1つ以上を強制していますが、今後は命令セットに応じて要素数をチェックする予定です。
 
-### �\���T���v��
-��Ԃ̑��x��ς���i���ID10�̑��x������50�ōō����x��50���ɕς���j
+### 構文サンプル
+列車の速度を変える（列車ID10の速度を距離50で最高速度の50％に変える）
 ```
 T	10	AutoSpeedCTRL	50	0.5
 ```
 
-��Ԃ̐i�s������ς���i0�̓_�~�[�ϐ��j
+列車の進行方向を変える（0はダミー変数）
 ```
 T	10	Turn	0
 ```
 
-��Ԃ̓d����ς���i0:OFF, 1:ON�j
+列車の電装を変える（0:OFF, 1:ON）
 ```
 T	10	SetPower	0
 ```
 
-�|�C���g��؂�ւ���i�|�C���gID11�̌�����1���ɂ���j
+ポイントを切り替える（ポイントID11の向きを1側にする）
 ```
 P	11	SetBranch	1
 ```
 
-## sendSettingFile�֐�
-�usend�v�t�H���_�������Ԃ�`sendSettingFile`�֐������s����ƃ��C�A�E�g�t�@�C������Ґ��Ɨ�Ԃ̈ꗗ���^�u��؂��Shift_JIS�e�L�X�g�t�@�C���Ƃ���`send\yyyymmddhhmmssffffff.txt`�֏o�͂��܂��B  
-���̏��́u�l�b�g���[�N�R���g���[���[�v���̐ݒ���Ƃ��ė��p�\�ł��B  
-������̃��X�g��ID���ŏo�͂��܂��B  
-�o�͂ɐ��������`send�t�H���_�Ƀ��C�A�E�g���t�@�C�����o�͂��܂����B`�ƕ\�����܂��B
+複数ポイントを切り替える（ポイントID11と12の向きを1側、13の向きを0側）
+```
+P	11_12_-13	SetBranch	1
+```
 
-- ���C�A�E�g�t�@�C���̏���N�����A�J�����g�f�B���N�g�����o�^�ɂ��t�H���_�ǂݍ��݂Ɏ��s����ꍇ������܂��B���̏ꍇ��VRM-NX���ċN�����Ă��������B
+## sendSettingFile関数
+「send」フォルダがある状態で`sendSettingFile`関数を実行するとレイアウトファイルから編成と列車の一覧をタブ区切りのShift_JISテキストファイルとして`send\yyyymmddhhmmssffffff.txt`へ出力します。  
+この情報は「ネットワークコントローラー」等の設定情報として利用可能です。  
+いずれのリストもID順で出力します。  
+出力に成功すると`sendフォルダにレイアウト情報ファイルを出力しました。`と表示します。
 
-### 1.�Ґ��ꗗ
+- レイアウトファイルの初回起動時、カレントディレクトリ未登録によりフォルダ読み込みに失敗する場合があります。その場合はVRM-NXを再起動してください。
 
-| �� | ���e | �ڍ� |
+### 1.編成一覧
+
+| 列 | 内容 | 詳細 |
 | ---- | ---- | ---- |
-| 1 | t(�Œ蕶��) | Object���ʎq |
+| 1 | t(固定文字) | Object識別子 |
 | 2 | ObjectID | GetID() |
 | 3 | ObjectNAME | GetNAME() |
-| 4 | X���W(��) | GetPosition()[0] |
-| 5 | Y���W(����) | GetPosition()[1] |
-| 6 | Z���W(�c) | GetPosition()[2] |
-| 7 | ���x(�d��0.0�`1.0) | GetVoltage() |
+| 4 | X座標(横) | GetPosition()[0] |
+| 5 | Y座標(高さ) | GetPosition()[1] |
+| 6 | Z座標(縦) | GetPosition()[2] |
+| 7 | 速度(電圧0.0～1.0) | GetVoltage() |
 
 ```
 t	10	TRAIN_10	2028.6000053961689	6.0	1096.0780848595002	0.0
@@ -142,39 +147,40 @@ t	54	TRAIN_54	1291.4000003714773	6.0	1163.484177169418	0.0
 t	64	TRAIN_64	2028.6000027358723	6.0	1332.593930070314	0.0
 ```
 
-### 2.�|�C���g�ꗗ
+### 2.ポイント一覧
 
-| �� | ���e | �ڍ� |
+| 列 | 内容 | 詳細 |
 | ---- | ---- | ---- |
-| 1 | p(�Œ蕶��) | Object���ʎq |
+| 1 | p(固定文字) | Object識別子 |
 | 2 | ObjectID | GetID() |
 | 3 | ObjectNAME | GetNAME() |
-| 4 | X���W(��) | GetPosition()[0] |
-| 5 | Y���W(����) | GetPosition()[1] |
-| 6 | Z���W(�c) | GetPosition()[2] |
-| 7 | ������(0,1) | GetBranch() |
+| 4 | X座標(横) | GetPosition()[0] |
+| 5 | Y座標(高さ) | GetPosition()[1] |
+| 6 | Z座標(縦) | GetPosition()[2] |
+| 7 | 分岐状態(0,1) | GetBranch() |
 
 ```
-p	675	B����wC�n���XL	2108.00009006219	0.0	411.48450518271034	0
-p	676	C����wB�n���XL	2364.0000885889813	0.0	445.18758033766994	0
-p	677	C����wB�n���XL	2108.000088588982	0.0	445.18756914755403	0
-p	678	B����wC�n���XR	2364.0000900621894	0.0	411.4845163728262	0
+p	675	B線上駅C渡り線XL	2108.00009006219	0.0	411.48450518271034	0
+p	676	C線上駅B渡り線XL	2364.0000885889813	0.0	445.18758033766994	0
+p	677	C線上駅B渡り線XL	2108.000088588982	0.0	445.18756914755403	0
+p	678	B線上駅C渡り線XR	2364.0000900621894	0.0	411.4845163728262	0
 ```
 
-## �z�肳��闘�p�V�[��
-- �O���v���O�����̉^�]�Ղ⎩���^�]�V�X�e���Ƃ̘A�g
-- DCC�R���g���[�����g�����}�X�R������iCOM�A�g�E���ߕϊ��j
-- ���C�A�E�g���m�̘A�g�������^���I�����C���^�]��
+## 想定される利用シーン
+- 外部プログラムの運転盤や自動運転システムとの連携
+- DCCコントローラを使ったマスコン制御（COM連携・命令変換）
+- レイアウト同士の連携させた疑似オンライン運転会
 
-## ����
-- v1.4 2020/10/24 �Ґ��̓d���𐧌䂷��usetPower�v�usetPowerAll�v�ǉ�
-- v1.3 2020/09/27 �A���_�[�o�[��؂�ɂ��|�C���g�ꊇ�ݒ�ɑΉ�
-- v1.2 2020/09/23 ���C�A�E�g���o�́usendSettingFile�v�ǉ�
-- v1.1 2020/09/14 �����]���uTurn�v���ߒǉ�
-- v1.0 2019/12/29 ���J
+## 履歴
+- v1.5 2020/11/14 複数分岐操作で負数の場合に逆方向とする機能を追加
+- v1.4 2020/10/24 編成の電源を制御する「setPower」「setPowerAll」追加
+- v1.3 2020/09/27 アンダーバー区切りによるポイント一括設定に対応
+- v1.2 2020/09/23 レイアウト情報出力「sendSettingFile」追加
+- v1.1 2020/09/14 方向転換「Turn」命令追加
+- v1.0 2019/12/29 公開
 
-## ����̎����\��
-- �ΏۃI�u�W�F�N�g�E���߃Z�b�g�̊g�[
-- �C�x���g�h���u���iSetEvent�`�j�̒ǉ�
-- �G���[����
-- VRM-NX������̏o�͑Ή�
+## 今後の実装予定
+- 対象オブジェクト・命令セットの拡充
+- イベントドリブン（SetEvent～）の追加
+- エラー制御
+- VRM-NX側からの出力対応
