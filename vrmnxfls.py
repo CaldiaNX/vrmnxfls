@@ -4,8 +4,8 @@ VRM-NX ファイル連携システム
 """
 __author__ = "Caldia"
 __status__ = "production"
-__version__ = "1.4"
-__date__    = "2020/10/24"
+__version__ = "1.5"
+__date__    = "2020/11/14"
 
 import vrmapi
 import shutil
