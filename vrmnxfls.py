@@ -47,6 +47,8 @@ def readFileLine(line):
         if line[2] == "AutoSpeedCTRL":
             #vrmapi.LOG(line[2])
             train.AutoSpeedCTRL(int(line[3]), float(line[4]))
+        elif line[2] == "Turn":
+            train.Turn()
     # 種別P＝ポイントオブジェクト
     elif line[0] == "P":
         #vrmapi.LOG(line[1])
