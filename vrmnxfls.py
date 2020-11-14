@@ -4,8 +4,8 @@ VRM-NX ファイル連携システム
 """
 __author__ = "Caldia"
 __status__ = "production"
-__version__ = "1.3"
-__date__    = "2020/09/27"
+__version__ = "1.4"
+__date__    = "2020/10/24"
 
 import vrmapi
 import shutil
@@ -40,7 +40,7 @@ def readFile():
             # 要素が0:Object種別、1:ID、2:命令、3:Paramの4つ以上
             if len(line) >= 4:
                 readFileLine(line)
-            vrmapi.LOG(str(t))
+            #vrmapi.LOG(str(t))
         # 読み込んだファイルは別フォルダへ移動
         re = vrmapi.SYSTEM().GetLayoutDir() + "\\read_end\\" + item.name
         #vrmapi.LOG(str(re))
@@ -60,26 +60,94 @@ def readFileLine(line):
             train.AutoSpeedCTRL(int(line[3]), float(line[4]))
         elif line[2] == "Turn":
             train.Turn()
+        elif line[2] == "SetPower":
+            setPower(train, int(line[3]))
     # 種別P＝ポイントオブジェクト
     elif line[0] == "P":
         vrmapi.LOG(line[1])
+        # 向き
+        d = int(line[3])
         # アンダーバーで複数あり(カンマは運転盤のcheckbox.Nameでエラーのため使えず)
         if ('_') in line[1]:
             # アンダーバーで分割
             pAry = line[1].split('_')
             # 複数ポイント処理
             for p in pAry:
+                pid = int(p)
+                # 負数の場合
+                if pid < 0:
+                    # 整数に戻す
+                    pid = -pid
+                    # 方向反転
+                    if d == 0:
+                        d = 1
+                    else:
+                        d = 0
                 # ID検索
-                point = vrmapi.LAYOUT().GetPoint(int(p))
-                #vrmapi.LOG("Search:" + p)
+                point = vrmapi.LAYOUT().GetPoint(pid)
+                vrmapi.LOG("SetBranch:" + str(pid) + " " + str(d))
                 if line[2] == "SetBranch":
-                    point.SetBranch(int(line[3]))
+                    point.SetBranch(d)
                     #vrmapi.LOG("Hit:" + p)
         else:
             # ID検索
             point = vrmapi.LAYOUT().GetPoint(int(line[1]))
             if line[2] == "SetBranch":
-                point.SetBranch(int(line[3]))
+                point.SetBranch(d)
+
+# 指定編成の車両電装を制御
+def setPower(tra, sw):
+    # サウンド変更
+    if sw == 0:
+        # 再生停止
+        tra.SetSoundPlayMode(0)
+    else:
+        # 常時再生
+        tra.SetSoundPlayMode(2)
+    #車両数を取得
+    len = tra.GetNumberOfCars()
+    #車両ごとに処理
+    for i in range(0, len):
+        #ダミーは対象外
+        if tra.GetDummyMode():
+            vrmapi.LOG(tra.GetNAME() + " ダミースキップ")
+        else:
+            # 車両を取得
+            car = tra.GetCar(i)
+            # 方向幕
+            car.SetRollsignLight(sw)
+            # 室内灯
+            car.SetRoomlight(sw)
+            # LED
+            car.SetLEDLight(sw)
+            # 運転台室内灯
+            car.SetCabLight(sw)
+            # パンダグラフ個数確認
+            for j in range(0, car.GetCountOfPantograph()):
+                # パンタグラフ
+                car.SetPantograph(j,sw)
+            # 先頭車両処理(ifを外して中間連結車も含む)
+            #if i == 0:
+            # ヘッドライト
+            car.SetHeadlight(sw)
+            # 最後尾車両処理(ifを外して中間連結車も含む)
+            #if i == len - 1:
+            # テールライト
+            car.SetTaillight(sw)
+            # 運転台室内灯
+            car.SetCabLight(sw)
+            # 蒸気機関車用（テンダーも対象）
+            if car.GetCarType() == 1:
+                # 煙
+                car.SetSmoke(sw)
+
+# 全編成の電源を一括操作
+def setPowerAll(sw):
+    # 編成リストを取得
+    tList = vrmapi.LAYOUT().GetTrainList()
+    # 編成ごとに処理
+    for tra in tList:
+        setPower(tra, sw)
 
 def sendSettingFile():
     """
