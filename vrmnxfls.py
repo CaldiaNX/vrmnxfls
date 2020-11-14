@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-@author: Caldia
+VRM-NX ファイル連携システム
 """
+__author__ = "Caldia"
+__status__ = "production"
+__version__ = "1.3"
+__date__    = "2020/09/27"
 
 import vrmapi
 import shutil
@@ -10,37 +14,42 @@ from datetime import datetime
 from pathlib import Path
 
 #ファイル読み込みの確認用
+vrmapi.LOG(vrmapi.SYSTEM().GetLayoutPath())
+vrmapi.LOG(vrmapi.SYSTEM().GetLayoutDir())
+#p = Path(vrmapi.SYSTEM().GetLayoutDir())
+#vrmapi.LOG(str(p.cwd()))
+#vrmapi.LOG(str(p.home()))
 vrmapi.LOG("load vrmnxfls.py")
 
-# ファイル連携システム
-# レイアウトファイルのフォルダに「read」フォルダと「read_end」フォルダを作成してください
 def readFile():
-        #vrmapi.LOG(str(p.cwd()))
-        #vrmapi.LOG(str(p.home()))
-        #vrmapi.LOG(vrmapi.SYSTEM().GetLayoutPath())
-        #vrmapi.LOG(vrmapi.SYSTEM().GetLayoutDir())
-        # Pathオブジェクトを生成
-        p = Path(vrmapi.SYSTEM().GetLayoutDir() + "\\read")
-        l = list(p.glob("*.txt"))
-        for item in l:
-            #vrmapi.LOG(str(item))
-            #withでテキスト読み込みモード使用
-            with open(item, 'r') as text:
-                # 文字列を全て読み込む
-                t = text.read()
-                # タブで分割
-                line = t.split()
-                # 要素が0:Object種別、1:ID、2:命令、3:Paramの4つ以上
-                if len(line) >= 4:
-                    readFileLine(line)
-                vrmapi.LOG(str(t))
-            # 読み込んだファイルは別フォルダへ移動
-            re = vrmapi.SYSTEM().GetLayoutDir() + "\\read_end\\" + item.name
-            #vrmapi.LOG(str(re))
-            shutil.move(item, re)
+    """
+    「read」フォルダのファイルを読み込みます。
+    レイアウトファイルと同じディレクトリに「read」フォルダと「read_end」フォルダを作成してください。
+    """
+    # Pathオブジェクトを生成
+    p = Path(vrmapi.SYSTEM().GetLayoutDir() + "\\read")
+    l = list(p.glob("*.txt"))
+    for item in l:
+        #vrmapi.LOG(str(item))
+        #withでテキスト読み込みモード使用
+        with open(item, 'r') as text:
+            # 文字列を全て読み込む
+            t = text.read()
+            # タブで分割
+            line = t.split()
+            # 要素が0:Object種別、1:ID、2:命令、3:Paramの4つ以上
+            if len(line) >= 4:
+                readFileLine(line)
+            vrmapi.LOG(str(t))
+        # 読み込んだファイルは別フォルダへ移動
+        re = vrmapi.SYSTEM().GetLayoutDir() + "\\read_end\\" + item.name
+        #vrmapi.LOG(str(re))
+        shutil.move(item, re)
 
-# FLS命令セット
 def readFileLine(line):
+    """
+    ファイルの命令を解析して実行します。
+    """
     #vrmapi.LOG(line[0])
     # 種別T＝列車オブジェクト
     if line[0] == "T":
@@ -53,14 +62,30 @@ def readFileLine(line):
             train.Turn()
     # 種別P＝ポイントオブジェクト
     elif line[0] == "P":
-        #vrmapi.LOG(line[1])
-        point = vrmapi.LAYOUT().GetPoint(int(line[1]))
-        if line[2] == "SetBranch":
-            point.SetBranch(int(line[3]))
+        vrmapi.LOG(line[1])
+        # アンダーバーで複数あり(カンマは運転盤のcheckbox.Nameでエラーのため使えず)
+        if ('_') in line[1]:
+            # アンダーバーで分割
+            pAry = line[1].split('_')
+            # 複数ポイント処理
+            for p in pAry:
+                # ID検索
+                point = vrmapi.LAYOUT().GetPoint(int(p))
+                #vrmapi.LOG("Search:" + p)
+                if line[2] == "SetBranch":
+                    point.SetBranch(int(line[3]))
+                    #vrmapi.LOG("Hit:" + p)
+        else:
+            # ID検索
+            point = vrmapi.LAYOUT().GetPoint(int(line[1]))
+            if line[2] == "SetBranch":
+                point.SetBranch(int(line[3]))
 
-# FLSレイアウト情報出力
 def sendSettingFile():
-    if(os.path.exists('send\\') == False):
+    """
+    レイアウト情報を「send」フォルダへファイル出力します。
+    """
+    if(os.path.exists(vrmapi.SYSTEM().GetLayoutDir() + "\\send") == False):
         #vrmapi.LOG("vrmnxfls.sendSettingFile is no find send\\ folder.")
         return
 
@@ -87,8 +112,8 @@ def sendSettingFile():
     # 結合
     text = ''.join(s)
     # ファイル出力
-    timeText = datetime.now().strftime('%Y%m%d_%H%M%S%f')
-    path_w = 'send\\' + timeText + '.txt'
+    timeText = datetime.now().strftime('%Y%m%d%H%M%S%f')
+    path_w = vrmapi.SYSTEM().GetLayoutDir() + "\\send\\" + timeText + '.txt'
     with open(path_w, mode='w') as f:
         f.write(text)
         vrmapi.LOG("sendフォルダにレイアウト情報ファイルを出力しました。")
