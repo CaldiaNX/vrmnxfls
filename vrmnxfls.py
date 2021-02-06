@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-VRM-NX ファイル連携システム
+VRMNXファイル連携システム
 """
 __author__ = "Caldia"
 __status__ = "production"
