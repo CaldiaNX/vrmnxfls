@@ -18,7 +18,7 @@ C:\VRMNX（一例）
 ├ \read
 ├ \read_end
 ├ \send (任意)「sendSettingFile」関数出力用
-├ vrmnx-fls.py
+├ vrmnxfls.py
 └ VRMNXレイアウトファイル.vrmnx
 ```
 
@@ -53,7 +53,7 @@ def vrmevent(obj,ev,param):
         dummy = 1
 ```
 
-ファイル読み込みに成功すると、ビューワー起動時のスクリプトログに `load vrmnx-fls.py` と表示されます。
+ファイル読み込みに成功すると、ビューワー起動時のスクリプトログに `load vrmnxfls.py` と表示されます。
 
 ## readFile関数
 テキストファイルが「read」フォルダにあると`readFile`関数がファイルを読み込み、命令を実行します。  
