@@ -7,10 +7,10 @@
 ![vrmnxfls-about](https://user-images.githubusercontent.com/66538961/107118763-3bbd3100-68c6-11eb-986b-252884227ef3.png)
 
 ## ダウンロード
-- [vrmnxfls.py](https://github.com/CaldiaNX/vrmnx-fls/blob/main/vrmnxfls.py)
+- [vrmnx-fls.py](https://github.com/CaldiaNX/vrmnx-fls/blob/main/vrmnx-fls.py)
 
 ## 利用方法
-レイアウトファイルと同じフォルダ階層に「vrmnxfls.py」ファイルと「read」「read_end」フォルダを準備します。  
+レイアウトファイルと同じフォルダ階層に「vrmnx-fls.py」ファイルと「read」「read_end」フォルダを準備します。  
 
 フォルダ構成：
 ```
@@ -18,7 +18,7 @@ C:\VRMNX（一例）
 ├ \read
 ├ \read_end
 ├ \send (任意)「sendSettingFile」関数出力用
-├ vrmnxfls.py
+├ vrmnx-fls.py
 └ VRMNXレイアウトファイル.vrmnx
 ```
 
@@ -53,7 +53,7 @@ def vrmevent(obj,ev,param):
         dummy = 1
 ```
 
-ファイル読み込みに成功すると、ビューワー起動時のスクリプトログに `load vrmnxfls.py` と表示されます。
+ファイル読み込みに成功すると、ビューワー起動時のスクリプトログに `load vrmnx-fls.py` と表示されます。
 
 ## readFile関数
 テキストファイルが「read」フォルダにあると`readFile`関数がファイルを読み込み、命令を実行します。  
