@@ -4,7 +4,7 @@
 「VRMNXファイル連携システム」（VRMNX File linkege System）は「[鉄道模型シミュレーターNX](http://www.imagic.co.jp/hobby/products/vrmnx/ "鉄道模型シミュレーターNX")」（VRMNX）のビュワーオブジェクトを外部から制御するためのPythonで記述されたシステムです。  
 タイマーイベント(既定は0.1秒毎)にレイアウトファイルと同階層にある「read」フォルダ内のファイルを読み込み、テキストで記述されている命令をVRMNXの命令に変換して実行します。
 
-![vrmnxfls-about](https://user-images.githubusercontent.com/66538961/107118763-3bbd3100-68c6-11eb-986b-252884227ef3.png)
+![vrmnxfls-about](https://user-images.githubusercontent.com/66538961/107119686-978ab880-68cc-11eb-8b23-310952a87242.png)
 
 ## ダウンロード
 - [vrmnxfls.py](https://github.com/CaldiaNX/vrmnx-fls/blob/main/vrmnxfls.py)
