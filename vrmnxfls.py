@@ -19,7 +19,7 @@ vrmapi.LOG(vrmapi.SYSTEM().GetLayoutDir())
 #p = Path(vrmapi.SYSTEM().GetLayoutDir())
 #vrmapi.LOG(str(p.cwd()))
 #vrmapi.LOG(str(p.home()))
-vrmapi.LOG("load vrmnx-fls.py")
+vrmapi.LOG("load vrmnxfls.py")
 
 def readFile():
     """
