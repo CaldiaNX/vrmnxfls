@@ -6,6 +6,9 @@
 
 ![vrmnxfls-about](https://user-images.githubusercontent.com/66538961/107118763-3bbd3100-68c6-11eb-986b-252884227ef3.png)
 
+## ダウンロード
+- [vrmnxfls.py](https://github.com/CaldiaNX/vrmnx-fls/blob/main/vrmnxfls.py)
+
 ## 利用方法
 レイアウトファイルと同じフォルダ階層に「vrmnxfls.py」ファイルと「read」「read_end」フォルダを準備します。  
 
