@@ -1,4 +1,4 @@
-# VRM-NXファイル連携システム
+# VRMNXファイル連携システム
 
 ## 概要
 「VRMNXファイル連携システム」（VRMNX File linkege System）は「[鉄道模型シミュレーターNX](http://www.imagic.co.jp/hobby/products/vrmnx/ "鉄道模型シミュレーターNX")」（VRMNX）のビュワーオブジェクトを外部から制御するためのPythonで記述されたシステムです。  
