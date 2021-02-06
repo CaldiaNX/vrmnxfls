@@ -10,7 +10,7 @@
 - [vrmnxfls.py](https://github.com/CaldiaNX/vrmnx-fls/blob/main/vrmnxfls.py)
 
 ## 利用方法
-レイアウトファイルと同じフォルダ階層に「vrmnx-fls.py」ファイルと「read」「read_end」フォルダを準備します。  
+レイアウトファイルと同じフォルダ階層に「vrmnxfls.py」ファイルと「read」「read_end」フォルダを準備します。  
 
 フォルダ構成：
 ```
