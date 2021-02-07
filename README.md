@@ -7,7 +7,7 @@
 ![vrmnxfls-about](https://user-images.githubusercontent.com/66538961/107119739-e9334300-68cc-11eb-8f29-7ed26ccc383b.png)
 
 ## ダウンロード
-- [vrmnxfls.py](https://raw.githubusercontent.com/CaldiaNX/vrmnxfls/main/vrmnxfls.py])
+- [vrmnxfls.py](https://raw.githubusercontent.com/CaldiaNX/vrmnxfls/main/vrmnxfls.py)
 
 ## 利用方法
 レイアウトファイルと同じフォルダ階層に「[vrmnxfls.py](vrmnxfls.py])」ファイルと「read」「read_end」フォルダを準備します。  
@@ -64,9 +64,8 @@ load vrmnxfls.py
 読み込んだファイルは「read_end」フォルダへ移動します。
 
 ## 関連資料
-- [VRMNXファイル連携システム リファレンス](REFERENCE.md])
-- [VRMNX-FLS対応コントローラー](vrmnxflsNetController.md])
-- [VRMNX-FLS対応サンプルレイアウト](vrmnxflsSampleLayout.md])
+- [VRMNXファイル連携システム リファレンス](REFERENCE.md)
+- [VRMNX-FLS対応コントローラー](vrmnxflsNetController.md)
 
 ## 履歴
 - 2020/11/14 v1.5
