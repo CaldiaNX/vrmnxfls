@@ -66,6 +66,7 @@ load vrmnxfls.py
 ## 関連資料
 - [VRMNXファイル連携システム リファレンス](REFERENCE.md)
 - [VRMNXネットワークコントローラー](vrmnxflsNetController.md)
+- [VRMNXネットワークコントローラー対応レイアウト](vrmnxflsSampleLayout.md)
 
 ## 履歴
 - 2020/11/14 v1.5
