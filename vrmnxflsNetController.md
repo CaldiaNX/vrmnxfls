@@ -10,7 +10,7 @@
 サンプルプログラムがOS機能でブロックされる場合はプロパティから「ブロックの解除」をしてください。  
 ウィルス対策ソフトで検出される場合は除外操作をしてください。
 
-- [vrmnxflsNetController.zip](https://github.com/CaldiaNX/vrmnxfls/files/5937275/vrmnxflsNetController.zip)
+- [vrmnxflsNetController_v26.zip](files/vrmnxflsNetController_v26.zip)
 
 ## 利用方法
 zipを展開して「`vrmnxflsNetController.exe`」を「VRMNXファイル連携システム」と同じフォルダ階層に配置します。  
@@ -19,7 +19,7 @@ zipを展開して「`vrmnxflsNetController.exe`」を「VRMNXファイル連携
 
 フォルダ構成：
 ```
-C:\VRMNX（一例）
+C:\VRMNX（例）
 ├ \read
 ├ \read_end
 ├ vrmnxflsNetController.exe 本体
@@ -38,7 +38,7 @@ C:\VRMNX（一例）
 ### クライアントモード
   - サーバーの「送信先URL・ポート番号」に対してUDPコマンドを発信するネットワークモードです。
   - 送信先URLに「127.0.0.1」または「localhost」を指定することで自身を対象にすることも出来ます。
-  - UDPの発信にはエフェメラルポートが利用されます。（ファイアウォール等の設定不要）
+  - UDPの発信にはエフェメラルポートが利用されます。（ファイアウォールの設定不要）
   - 「;」で区切ることで複数サーバーに送信します。（※v2.3以降、テスト実装）
 ### サーバーモード
   - クライアントモードから発信されたコマンドを受信して出力フォルダにファイル出力するモードです。
@@ -109,6 +109,9 @@ t	64	B1_683系_サンダーバード
 運転制御盤の配線図作成は作図に特化したWebサービスの [Diagrams.net](https://app.diagrams.net/) が便利です。  
 
 ## 履歴
+- 2021/02/11 v2.6
+    - 名称表記ゆれを修正
+    - ID入力欄追加。クライアントモードの接続・切断時にサーバへID通知
 - 2020/10/24 v2.5
     - 編成電源スイッチ「Pw」を追加（vrmnxfls.py v1.4以降）
     - 複数ポイントを含んだ状態で設定を保存するとエラーとなる不具合を修正

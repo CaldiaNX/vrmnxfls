@@ -7,7 +7,7 @@
 読み込み対象は「＊.txt」で検出します。  
 年月日時分秒の命名規則はFIFO（先入れ先出し）を遵守するためのルールです。  
 
-### 構文サンプル
+## 構文サンプル
 列車の速度を変える（列車ID10の速度を距離50で最高速度の50％に変える）
 ```
 T	10	AutoSpeedCTRL	50	0.5
@@ -33,34 +33,34 @@ P	11	SetBranch	1
 P	11_12_-13	SetBranch	1
 ```
 
-#### 1：Object識別子
+### (1) Object識別子
 | 識別子 | オブジェクト | 名前 |
-| ---- | ---- | ---- |
-| T | VRMTrain | 編成 |
-| P | VRMPoint | ポイント |
-| A | VRMATS | 自動センサー |
-| B | VRMBell | 音源 |
+| ------ | ---- | ---- |
+| T | VRMTrain  | 編成 |
+| P | VRMPoint  | ポイント |
+| A | VRMATS    | 自動センサー |
+| B | VRMBell   | 音源 |
 | C | VRMCamera | 地上カメラ |
-| R | VRMCar | 車輌 |
-| X | VRMCrossing | 踏切、ホームドア |
-| E | VRMEmitter | エミッター |
-| L | VRMLayout | レイアウト |
+| R | VRMCar    | 車輌 |
+| X | VRMCrossing   | 踏切、ホームドア |
+| E | VRMEmitter    | エミッター |
+| L | VRMLayout     | レイアウト |
 | M | VRMMotionPath | モーションパス |
 | G | VRMSignal | 信号 |
-| K | VRMSky | スカイドーム、天候 |
+| K | VRMSky    | スカイドーム、天候 |
 | I | VRMSprite | スプライト |
 | S | VRMSystem | システム |
-| U | VRMTurntable | ターンターブル |
+| U | VRMTurntable  | ターンターブル |
 
-#### 2：ObjectID(int)
+### (2) ObjectID(int)
 現行版は直接参照のみ対応しているため、無効なIDがある場合はエラーとなります。  
 データ名での指定や、存在チェックを導入する予定です。
 
-#### 3：命令関数名
+### (3) 命令関数名
 VRMNXで定義されている各オブジェクトの命令文字列です。  
 文字列が無効なものは命令が無視されます。
 
-#### 4：命令引数
+### (4) 命令引数
 命令関数に必要な引数を記載します。  
 引数が1つ以上ない場合は命令が無視されます。  
 現行版は1つ以上を強制しています。（今後、命令セットに応じて要素数をチェック予定）
@@ -88,26 +88,26 @@ p	677	C線上駅B渡り線XL	2108.000088588982	0.0	445.18756914755403	0
 p	678	B線上駅C渡り線XR	2364.0000900621894	0.0	411.4845163728262	0
 ```
 
-### 編成一覧
+### (1) 編成一覧
 | 列 | 内容 | 詳細 |
 | ---- | ---- | ---- |
 | 1 | t(固定文字) | Object識別子 |
-| 2 | ObjectID | GetID() |
-| 3 | ObjectNAME | GetNAME() |
-| 4 | X座標(横) | GetPosition()[0] |
+| 2 | ObjectID    | GetID() |
+| 3 | ObjectNAME  | GetNAME() |
+| 4 | X座標(横)   | GetPosition()[0] |
 | 5 | Y座標(高さ) | GetPosition()[1] |
-| 6 | Z座標(縦) | GetPosition()[2] |
+| 6 | Z座標(縦)   | GetPosition()[2] |
 | 7 | 速度(電圧0.0～1.0) | GetVoltage() |
 
-### ポイント一覧
+### (2) ポイント一覧
 | 列 | 内容 | 詳細 |
 | ---- | ---- | ---- |
 | 1 | p(固定文字) | Object識別子 |
-| 2 | ObjectID | GetID() |
-| 3 | ObjectNAME | GetNAME() |
-| 4 | X座標(横) | GetPosition()[0] |
+| 2 | ObjectID    | GetID() |
+| 3 | ObjectNAME  | GetNAME() |
+| 4 | X座標(横)   | GetPosition()[0] |
 | 5 | Y座標(高さ) | GetPosition()[1] |
-| 6 | Z座標(縦) | GetPosition()[2] |
+| 6 | Z座標(縦)   | GetPosition()[2] |
 | 7 | 分岐状態(0,1) | GetBranch() |
 
 ## setPowerAll関数

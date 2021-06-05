@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-VRMNXファイル連携システム
-"""
+__title__ = "VRMNXファイル連携システム Ver.1.6"
 __author__ = "Caldia"
-__status__ = "production"
-__version__ = "1.5"
-__date__    = "2020/11/14"
+__update__  = "2021/05/25"
 
 import vrmapi
 import shutil
@@ -13,24 +8,37 @@ import os.path
 from datetime import datetime
 from pathlib import Path
 
-#ファイル読み込みの確認用
-vrmapi.LOG(vrmapi.SYSTEM().GetLayoutPath())
-vrmapi.LOG(vrmapi.SYSTEM().GetLayoutDir())
-#p = Path(vrmapi.SYSTEM().GetLayoutDir())
-#vrmapi.LOG(str(p.cwd()))
-#vrmapi.LOG(str(p.home()))
-vrmapi.LOG("load vrmnxfls.py")
+# ファイル読み込みの確認用
+vrmapi.LOG("import " + __title__)
 
+# main
+def vrmevent(obj,ev,param):
+    if ev == 'init':
+        # フォルダチェック
+        dir = vrmapi.SYSTEM().GetLayoutDir()
+        if(os.path.exists(dir + "\\read") == False):
+            vrmapi.LOG(dir + "\\read フォルダがありません。")
+            return
+        if(os.path.exists(dir + "\\read_end") == False):
+            vrmapi.LOG(dir + "\\read_end フォルダがありません。")
+            return
+        # 起動時に0.1秒間隔のタイマーイベントを登録
+        obj.SetEventTimer(0.1)
+        # (任意)レイアウト内の全編成の電源を一括設定(0:OFF, 1:ON)
+        #setPowerAll(0)
+        # (任意)sendフォルダにポイントと編成情報を出力
+        #sendSettingFile()
+    elif ev == 'timer':
+        # タイマーイベントでフォルダを周期監視
+        readFile()
+
+
+# readフォルダのファイル読み込み
 def readFile():
-    """
-    「read」フォルダのファイルを読み込みます。
-    レイアウトファイルと同じディレクトリに「read」フォルダと「read_end」フォルダを作成してください。
-    """
     # Pathオブジェクトを生成
     p = Path(vrmapi.SYSTEM().GetLayoutDir() + "\\read")
     l = list(p.glob("*.txt"))
     for item in l:
-        #vrmapi.LOG(str(item))
         #withでテキスト読み込みモード使用
         with open(item, 'r') as text:
             # 文字列を全て読み込む
@@ -46,11 +54,9 @@ def readFile():
         #vrmapi.LOG(str(re))
         shutil.move(item, re)
 
+
+# ファイルの命令を解析して実行
 def readFileLine(line):
-    """
-    ファイルの命令を解析して実行します。
-    """
-    #vrmapi.LOG(line[0])
     # 種別T＝列車オブジェクト
     if line[0] == "T":
         #vrmapi.LOG(line[1])
@@ -88,7 +94,6 @@ def readFileLine(line):
                 vrmapi.LOG("SetBranch:" + str(pid) + " " + str(d))
                 if line[2] == "SetBranch":
                     point.SetBranch(d)
-                    #vrmapi.LOG("Hit:" + p)
         else:
             # ID検索
             point = vrmapi.LAYOUT().GetPoint(int(line[1]))
@@ -149,12 +154,12 @@ def setPowerAll(sw):
     for tra in tList:
         setPower(tra, sw)
 
+
+# レイアウト情報を「send」フォルダへファイル出力
 def sendSettingFile():
-    """
-    レイアウト情報を「send」フォルダへファイル出力します。
-    """
-    if(os.path.exists(vrmapi.SYSTEM().GetLayoutDir() + "\\send") == False):
-        #vrmapi.LOG("vrmnxfls.sendSettingFile is no find send\\ folder.")
+    dir = vrmapi.SYSTEM().GetLayoutDir()
+    if(os.path.exists(dir + "\\send") == False):
+        vrmapi.LOG(dir + "\\send フォルダがありません。")
         return
 
     s = list()
@@ -181,7 +186,7 @@ def sendSettingFile():
     text = ''.join(s)
     # ファイル出力
     timeText = datetime.now().strftime('%Y%m%d%H%M%S%f')
-    path_w = vrmapi.SYSTEM().GetLayoutDir() + "\\send\\" + timeText + '.txt'
+    path_w = dir + "\\send\\" + timeText + '.txt'
     with open(path_w, mode='w') as f:
         f.write(text)
-        vrmapi.LOG("sendフォルダにレイアウト情報ファイルを出力しました。")
+        vrmapi.LOG(dir + "\\send フォルダにレイアウト情報ファイルを出力しました。")
