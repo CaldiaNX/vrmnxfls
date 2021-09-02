@@ -1,6 +1,6 @@
-__title__ = "VRMNXファイル連携システム Ver.1.6"
+__title__ = "VRMNXファイル連携システム Ver.1.7"
 __author__ = "Caldia"
-__update__  = "2021/05/25"
+__update__  = "2021/09/03"
 
 import vrmapi
 import shutil
@@ -39,20 +39,28 @@ def readFile():
     p = Path(vrmapi.SYSTEM().GetLayoutDir() + "\\read")
     l = list(p.glob("*.txt"))
     for item in l:
-        #withでテキスト読み込みモード使用
-        with open(item, 'r') as text:
-            # 文字列を全て読み込む
-            t = text.read()
-            # タブで分割
-            line = t.split()
-            # 要素が0:Object種別、1:ID、2:命令、3:Paramの4つ以上
-            if len(line) >= 4:
-                readFileLine(line)
-            #vrmapi.LOG(str(t))
-        # 読み込んだファイルは別フォルダへ移動
-        re = vrmapi.SYSTEM().GetLayoutDir() + "\\read_end\\" + item.name
-        #vrmapi.LOG(str(re))
-        shutil.move(item, re)
+        try:
+            #withでテキスト読み込みモード使用
+            with open(item, 'r') as text:
+                # 文字列を全て読み込む
+                t = text.read()
+                # タブで分割
+                line = t.split()
+                # 要素が0:Object種別、1:ID、2:命令、3:Paramの4つ以上
+                if len(line) >= 4:
+                    readFileLine(line)
+                #vrmapi.LOG(str(t))
+            # 読み込んだファイルは別フォルダへ移動
+            re = vrmapi.SYSTEM().GetLayoutDir() + "\\read_end\\" + item.name
+            #vrmapi.LOG(str(re))
+            shutil.move(item, re)
+        except Exception as e:
+            # エラーファイルは名前を変えて別フォルダへ移動
+            re = vrmapi.SYSTEM().GetLayoutDir() + "\\read_end\\ERR_" + item.name
+            vrmapi.LOG(str(e))
+            vrmapi.LOG(str(re))
+            shutil.move(item, re)
+
 
 
 # ファイルの命令を解析して実行
