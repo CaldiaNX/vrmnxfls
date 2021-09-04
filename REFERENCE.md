@@ -42,7 +42,7 @@ VRMNXファイル連携システムで実装されている命令文字列を記
 ## 実装命令一覧
 |識別子|ID|命令関数名|命令引数|
 |--|--|--|--|
-|T |ID|[AutoSpeedCTRL](AutoSpeedCTRL)|0.0～1.0(最高速度の割合)|
+|T |ID|[AutoSpeedCTRL](https://vrmcloud.net/nx/script/script/train/AutoSpeedCTRL.html)|0.0～1.0(最高速度の割合)|
 |T |ID|[Turn](https://vrmcloud.net/nx/script/script/train/Turn.html)|0(ダミー)|
 |T |ID|[PlayHorn](https://vrmcloud.net/nx/script/script/train/PlayHorn.html)|0(標準), 1(組込み)|
 |T |ID|[SplitTrain](https://vrmcloud.net/nx/script/script/train/SplitTrain.html)|1以上(切り離す車両位置)|
