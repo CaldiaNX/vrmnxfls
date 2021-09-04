@@ -1,6 +1,6 @@
 __title__ = "VRMNXファイル連携システム Ver.1.7"
 __author__ = "Caldia"
-__update__  = "2021/09/03"
+__update__  = "2021/09/05"
 
 import vrmapi
 import shutil
@@ -74,6 +74,11 @@ def readFileLine(line):
             train.AutoSpeedCTRL(int(line[3]), float(line[4]))
         elif line[2] == "Turn":
             train.Turn()
+        elif line[2] == "PlayHorn":
+            train.PlayHorn(int(line[3]))
+        elif line[2] == "SplitTrain":
+            spl = train.SplitTrain(int(line[3]))
+            vrmapi.LOG("Train[{}].SplitTrain({})->Train[{}]".format(line[1], line[3], spl))
         elif line[2] == "SetPower":
             setPower(train, int(line[3]))
     # 種別P＝ポイントオブジェクト
