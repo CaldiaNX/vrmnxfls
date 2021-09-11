@@ -1,11 +1,11 @@
 # VRMNXファイル連携システム 仕様
 
 ## readFile関数
-「read」フォルダにテキストファイルがあると`readFile`関数がファイルを読み込み、命令を実行します。  
+「readフォルダ」内のテキストファイルを検知すると「readFile関数」がファイルを読み込み、命令を実行します。  
 ファイルはダブルクオーテーション無し、改行無し、タブ区切りの1行Shift-JISテキスト形式です。  
 ファイル名は年月日時分秒「yyyymmddhhmmssfff.txt」です。  
-読み込み対象は「＊.txt」で検出します。  
 年月日時分秒の命名規則はFIFO（先入れ先出し）を遵守するためのルールです。  
+読み込み対象は「＊.txt」で0.1秒ごとのポーリングで検出します。  
 
 ### (1) Object識別子
 | 識別子 | オブジェクト | 名前 |
@@ -75,70 +75,93 @@ P	11_12_-13	SetBranch	1
 「VRMNXファイル連携システム」と関係性の無い便利関数です。  
 レイアウトにある全編成の電装系をONにします。  
 主に起動時の初期設定として利用しますが、単体でも実行できます。  
-編成別に処理したい場合は```setPower```関数を利用します。
+編成別に処理したい場合は「setPower関数」を利用します。
 
 ## sendSettingFile関数
-「send」フォルダがある状態で`sendSettingFile`関数を実行するとレイアウトファイルから編成リストとポイントリストをID順でタブ区切りのShift_JISテキストファイルとして`send\yyyymmddhhmmssffffff.txt`へ出力します。  
-主に「ネットワークコントローラー」等の設定情報として利用できます。  
+「sendフォルダ」がある状態で「sendSettingFile関数」を実行すると「レイアウト情報ファイル」を出力します。  
+レイアウトの編成リストとポイントリストをID順でタブ区切りのShift_JISテキストファイルとして「send\yyyymmddhhmmssffffff.txt」へ出力します。  
+「ネットワークコントローラー」等の設定情報として利用できます。
 
 出力に成功すると
 ```
 sendフォルダにレイアウト情報ファイルを出力しました。
 ```
-と表示します。  
+と表示します。
 
 出力例：
 ```
-t	10	TRAIN_10	2028.6000053961689	6.0	1096.0780848595002	0.0
-t	25	TRAIN_25	1297.874999999999	6.0	1400.0000223802317	0.0
-t	54	TRAIN_54	1291.4000003714773	6.0	1163.484177169418	0.0
-t	64	TRAIN_64	2028.6000027358723	6.0	1332.593930070314	0.0
+t	10	TRAIN_A	1001N	1138	814	6	180	5
+t	64	TRAIN_B	2001N	1912	848	6	0	3	dummy
 
-p	675	B線上駅C渡り線XL	2108.00009006219	0.0	411.48450518271034	0
-p	676	C線上駅B渡り線XL	2364.0000885889813	0.0	445.18758033766994	0
-p	677	C線上駅B渡り線XL	2108.000088588982	0.0	445.18756914755403	0
-p	678	B線上駅C渡り線XR	2364.0000900621894	0.0	411.4845163728262	0
+p	12	A2	0	1537	814	0	180
+p	20	A1	0	2513	814	0	0
+p	55	B1	1	2513	848	0	0
+p	63	B2	1	1537	848	0	180
+```
+浮動小数点型は整数値で出力されます。
+
+### (1) 編成一覧
+| 列   | 内容 | 詳細 |
+| ---- | ---- | ---- |
+| 1 | t (固定文字) | 識別文字 |
+| 2 | 列車ID | [GetID()](https://vrmcloud.net/nx/script/script/data/GetID.html) |
+| 3 | 列車名 | [GetNAME()](https://vrmcloud.net/nx/script/script/data/GetNAME.html) |
+| 4 | 列車番号 | [GetTrainNumber()](https://vrmcloud.net/nx/script/script/train/GetTrainNumber.html) |
+| 5 | X座標(横)   | [GetPosition()](https://vrmcloud.net/nx/script/script/data/GetPosition.html)[0] |
+| 6 | Z座標(縦)   | GetPosition()[2] |
+| 7 | Y座標(高さ) | GetPosition()[1] |
+| 8 | 角度 | [GetRotate()](https://vrmcloud.net/nx/script/script/data/GetRotate.html) |
+| 9 | 車両数 | len([GetCarList()](https://vrmcloud.net/nx/script/script/train/GetCarList.html)) |
+| 10 | ダミーフラグ | [GetDummyMode()](https://vrmcloud.net/nx/script/script/train/GetDummyMode.html) |
+
+### (2) ポイント一覧
+| 列   | 内容 | 詳細 |
+| ---- | ---- | ---- |
+| 1 | p (固定文字) | 識別文字 |
+| 2 | ポイントID    | [GetID()](https://vrmcloud.net/nx/script/script/data/GetID.html) |
+| 3 | ポイント名  | [GetNAME()](https://vrmcloud.net/nx/script/script/data/GetNAME.html) |
+| 4 | 分岐状態(0,1) | [GetBranch()](https://vrmcloud.net/nx/script/script/point/GetBranch.html) |
+| 5 | X座標(横)   | [GetPosition()](https://vrmcloud.net/nx/script/script/data/GetPosition.html)[0] |
+| 6 | Z座標(縦)   | GetPosition()[2] |
+| 7 | Y座標(高さ) | GetPosition()[1] |
+
+## sendStateFile関数
+オプション機能で命令実行後に「sendフォルダ」へ「レイアウト情報ファイル」を出力することができます。  
+「sendSettingFile関数」と動作が似ていますが出力内容が異なります。  
+
+利用する場合は以下のフラグを「True」にします。  
+「readFile関数」が実行されるたびにファイルを作成します。
+
+```py
+# 出力機能(True…有効、False…無効)
+_sendState = False
+```
+
+「sendフォルダ」がある状態で「sendStateFile」関数を実行するとレイアウトファイルから編成リストとポイントリストをID順でタブ区切りのShift_JISテキストファイルとして「send\yyyymmddhhmmssffffff.txt」へ出力します。  
+「sendフォルダ」が無い場合は起動時のフォルダチェックでエラーとなり、機能が無効になります。  
+ダミー編成、および頭文字が「dummy」のポイントは除外されます。
+
+出力例：
+```
+t	10	0.0
+t	64	0.0
+
+p	12	0
+p	20	1
+p	55	0
+p	63	0
 ```
 
 ### (1) 編成一覧
-| 列 | 内容 | 詳細 |
+| 列   | 内容 | 詳細 |
 | ---- | ---- | ---- |
-| 1 | t(固定文字) | Object識別子 |
-| 2 | ObjectID    | GetID() |
-| 3 | ObjectNAME  | GetNAME() |
-| 4 | X座標(横)   | GetPosition()[0] |
-| 5 | Y座標(高さ) | GetPosition()[1] |
-| 6 | Z座標(縦)   | GetPosition()[2] |
-| 7 | 速度(電圧0.0～1.0) | GetVoltage() |
+| 1 | t (固定文字) | 識別文字 |
+| 2 | 列車ID | [GetID()](https://vrmcloud.net/nx/script/script/data/GetID.html) |
+| 3 | 速度(電圧0.0～1.0) | [GetVoltage()](https://vrmcloud.net/nx/script/script/train/GetVoltage.html) |
 
 ### (2) ポイント一覧
-| 列 | 内容 | 詳細 |
+| 列   | 内容 | 詳細 |
 | ---- | ---- | ---- |
-| 1 | p(固定文字) | Object識別子 |
-| 2 | ObjectID    | GetID() |
-| 3 | ObjectNAME  | GetNAME() |
-| 4 | X座標(横)   | GetPosition()[0] |
-| 5 | Y座標(高さ) | GetPosition()[1] |
-| 6 | Z座標(縦)   | GetPosition()[2] |
-| 7 | 分岐状態(0,1) | GetBranch() |
-
-## 履歴
-- 2021/09/05 v1.7
-  - エラーファイルで無限ループに陥る症状を「ERR_*.txt」で出力して抜け出すように修正。
-  - 「PlayHorn」「SplitTrain」を実装。
-  - 履歴をこちらへ移動。実装命令一覧を追記。
-- 2021/06/05 v1.6
-  - 呼び出し方法を変更。※既存レイアウトは修正が必要
-  - 細部の記述を修正
-- 2020/11/14 v1.5
-  - 複数分岐操作で負数の場合に逆方向とする機能を追加
-- 2020/10/24 v1.4
-  - 編成の電源を制御する「setPower」「setPowerAll」追加
-- 2020/09/27 v1.3
-  - アンダーバー区切りによるポイント一括設定に対応
-- 2020/09/23 v1.2
-  - レイアウト情報出力「sendSettingFile」追加
-- 2020/09/14 v1.1
-  - 方向転換「Turn」命令追加
-- 2019/12/29 v1.0
-  - 公開
+| 1 | p (固定文字) | 識別文字 |
+| 2 | ポイントID    | [GetID()](https://vrmcloud.net/nx/script/script/data/GetID.html) |
+| 3 | 分岐状態(0,1) | [GetBranch()](https://vrmcloud.net/nx/script/script/point/GetBranch.html) |

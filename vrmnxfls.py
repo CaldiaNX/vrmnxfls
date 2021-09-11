@@ -1,6 +1,6 @@
-__title__ = "VRMNXファイル連携システム Ver.1.7"
+__title__ = "VRMNXファイル連携システム Ver.1.8"
 __author__ = "Caldia"
-__update__  = "2021/09/05"
+__update__  = "2021/09/11"
 
 import vrmapi
 import shutil
@@ -10,6 +10,8 @@ from pathlib import Path
 
 # ファイル読み込みの確認用
 vrmapi.LOG("import " + __title__)
+# 出力機能(True…有効、False…無効)
+_sendState = False
 
 # main
 def vrmevent(obj,ev,param):
@@ -17,17 +19,26 @@ def vrmevent(obj,ev,param):
         # フォルダチェック
         dir = vrmapi.SYSTEM().GetLayoutDir()
         if(os.path.exists(dir + "\\read") == False):
-            vrmapi.LOG(dir + "\\read フォルダがありません。")
+            vrmapi.LOG(dir + "\\read フォルダがありません。ファイル連携機能を無効にします。")
             return
         if(os.path.exists(dir + "\\read_end") == False):
-            vrmapi.LOG(dir + "\\read_end フォルダがありません。")
+            vrmapi.LOG(dir + "\\read_end フォルダがありません。ファイル連携機能を無効にします。")
             return
+        global _sendState
+        if _sendState == True:
+            if(os.path.exists(dir + "\\send") == False):
+                vrmapi.LOG(dir + "\\send フォルダがありません。出力機能を無効にします。")
+                # 出力機能無効化
+                _sendState = False
+                return
+            else:
+                vrmapi.LOG("出力機能が有効です。")
         # 起動時に0.1秒間隔のタイマーイベントを登録
         obj.SetEventTimer(0.1)
         # (任意)レイアウト内の全編成の電源を一括設定(0:OFF, 1:ON)
         #setPowerAll(0)
-        # (任意)sendフォルダにポイントと編成情報を出力
-        #sendSettingFile()
+        # (任意)sendフォルダにレイアウト初期情報を出力
+        sendSettingFile()
     elif ev == 'timer':
         # タイマーイベントでフォルダを周期監視
         readFile()
@@ -54,13 +65,16 @@ def readFile():
             re = vrmapi.SYSTEM().GetLayoutDir() + "\\read_end\\" + item.name
             #vrmapi.LOG(str(re))
             shutil.move(item, re)
+            # 出力機能
+            global _sendState
+            if _sendState == True:
+                sendStateFile()
         except Exception as e:
             # エラーファイルは名前を変えて別フォルダへ移動
             re = vrmapi.SYSTEM().GetLayoutDir() + "\\read_end\\ERR_" + item.name
             vrmapi.LOG(str(e))
             vrmapi.LOG(str(re))
             shutil.move(item, re)
-
 
 
 # ファイルの命令を解析して実行
@@ -83,7 +97,7 @@ def readFileLine(line):
             setPower(train, int(line[3]))
     # 種別P＝ポイントオブジェクト
     elif line[0] == "P":
-        vrmapi.LOG(line[1])
+        #vrmapi.LOG(line[1])
         # 向き
         d = int(line[3])
         # アンダーバーで複数あり(カンマは運転盤のcheckbox.Nameでエラーのため使えず)
@@ -112,6 +126,7 @@ def readFileLine(line):
             point = vrmapi.LAYOUT().GetPoint(int(line[1]))
             if line[2] == "SetBranch":
                 point.SetBranch(d)
+
 
 # 指定編成の車両電装を制御
 def setPower(tra, sw):
@@ -159,6 +174,7 @@ def setPower(tra, sw):
                 # 煙
                 car.SetSmoke(sw)
 
+
 # 全編成の電源を一括操作
 def setPowerAll(sw):
     # 編成リストを取得
@@ -168,7 +184,7 @@ def setPowerAll(sw):
         setPower(tra, sw)
 
 
-# レイアウト情報を「send」フォルダへファイル出力
+# レイアウト初期情報ファイル出力
 def sendSettingFile():
     dir = vrmapi.SYSTEM().GetLayoutDir()
     if(os.path.exists(dir + "\\send") == False):
@@ -177,23 +193,27 @@ def sendSettingFile():
 
     s = list()
 
-    #編成リストを新規編成リストに格納
+    # 編成リストを新規編成リストに格納
     tList = vrmapi.LAYOUT().GetTrainList()
-    #新規編成リストから編成を繰り返し取得
+    # 新規編成リストから編成を繰り返し取得
     for t in tList:
         pos = t.GetPosition()
-        s.append('t\t{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n'.format(t.GetID(), t.GetNAME(), pos[0], pos[1], pos[2], t.GetVoltage()))
+        s.append('t\t{0}\t{1}\t{2}\t{3:.0f}\t{4:.0f}\t{5:.0f}\t{6:.0f}\t{7}'.format(t.GetID(), t.GetNAME(), t.GetTrainNumber(), pos[0], pos[2], pos[1], t.GetRotate(), len(t.GetCarList())))
+        if t.GetDummyMode() == True:
+            s.append('\tdummy\n')
+        else:
+            s.append('\n')
     s.append('\n')
 
-    #新規ポイントリストを作成
+    # 新規ポイントリストを作成
     pList=list()
-    #ポイントリストを新規ポイントリストに格納
+    # ポイントリストを新規ポイントリストに格納
     vrmapi.LAYOUT().ListPoint(pList)
-    #新規ポイントリストからポイントを繰り返し取得
+    # 新規ポイントリストからポイントを繰り返し取得
     for p in pList:
         pos = p.GetPosition()
-        s.append('p\t{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n'.format(p.GetID(), p.GetNAME(), pos[0], pos[1], pos[2], p.GetBranch()))
-    s.append('\n')
+        s.append('p\t{0}\t{1}\t{2}\t{3:.0f}\t{4:.0f}\t{5:.0f}\t{6:.0f}\n'.format(p.GetID(), p.GetNAME(), p.GetBranch(), pos[0], pos[2], pos[1], p.GetRotate()))
+    #s.append('\n')
 
     # 結合
     text = ''.join(s)
@@ -202,4 +222,42 @@ def sendSettingFile():
     path_w = dir + "\\send\\" + timeText + '.txt'
     with open(path_w, mode='w') as f:
         f.write(text)
-        vrmapi.LOG(dir + "\\send フォルダにレイアウト情報ファイルを出力しました。")
+        vrmapi.LOG(path_w + " を出力しました。")
+
+
+# レイアウト情報ファイル出力
+def sendStateFile():
+    dir = vrmapi.SYSTEM().GetLayoutDir()
+    if(os.path.exists(dir + "\\send") == False):
+        vrmapi.LOG(dir + "\\send フォルダがありません。")
+        return
+
+    s = list()
+
+    # 編成リストを新規編成リストに格納
+    tList = vrmapi.LAYOUT().GetTrainList()
+    # 新規編成リストから編成を繰り返し取得
+    for t in tList:
+        # ダミー編成は除外
+        if t.GetDummyMode() == False:
+            s.append('t\t{0}\t{1:.1f}\n'.format(t.GetID(), t.GetVoltage()))
+    s.append('\n')
+
+    # 新規ポイントリストを作成
+    pList=list()
+    # ポイントリストを新規ポイントリストに格納
+    vrmapi.LAYOUT().ListPoint(pList)
+    # 新規ポイントリストからポイントを繰り返し取得
+    for p in pList:
+        # 頭文字「dummy」は対象外
+        if p.GetNAME()[0:5] != 'dummy':
+            s.append('p\t{0}\t{1}\n'.format(p.GetID(), p.GetBranch()))
+    #s.append('\n')
+
+    # 結合
+    text = ''.join(s)
+    # ファイル出力
+    timeText = datetime.now().strftime('%Y%m%d%H%M%S%f')
+    path_w = dir + "\\send\\" + timeText + '.txt'
+    with open(path_w, mode='w') as f:
+        f.write(text)
